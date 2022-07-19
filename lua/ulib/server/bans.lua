@@ -24,7 +24,7 @@ function ULib.getBanMessage( steamid, banData, templateMessage )
 		BAN_START = "(Unknown)",
 		REASON = "(None given)",
 		TIME_LEFT = "(Permaban)",
-		STEAMID = steamid:gsub("%D", ""),
+		STEAMID = steamid,
 		STEAMID64 = util.SteamIDTo64( steamid ),
 	}
 
