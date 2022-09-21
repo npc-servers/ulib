@@ -1,6 +1,20 @@
 # ULib Changelog
 
-## v2.70 - *(00/00/00)*
+## Experimental Features in Testing - *(00/00/0000)*
+* [ADD] Added a hook for PostCommandCalled (Thanks, brandonsturgeon)
+* [CHANGE] Moved Users to SQLite. (Thanks, JoshPiper)
+
+## v2.71 - *(00/00/0000)*
+* [ADD] Added a sanity check to ULib.replicatedWritableCvar to address older addons after the net code rewrite. (Thanks, ZenBre4ker)
+* [FIX] Fixed some issues in player.lua with SetClip errors. (Thanks, JoshPiper)
+* [FIX] Cleaned up some code in player.lua to be more aligned with our docs. (Thanks, JoshPiper)
+* [FIX] Added returns to some fallback functions in sh_ucl.lua (Thanks, Deyvan)
+* [FIX] Ban reason string was returning two values due to a change in gsub returns. Localized the replacement gsub and return only the string value.
+* [FIX] Removed legacy hooks when cleaned up, fixes potential memory leak issues.
+* [CHANGE] Removed gsub from the SteamID replacement string in ban reasons.
+* [CHANGE] Strings can now be passed to ULib.addBan for the admin parameter. This is useful for 3rd party integrations of ULib's ban. (Thanks, wrefgtzweve)
+
+## v2.70 - *(08/04/2022)*
 * [ADD] Hook when a new, previously unknown access is registered. UCLChanged is now called as well.
 * [CHANGE] Moved bans to SQLite.
 * [CHANGE] Listen server hosts can no longer be banned (thanks, lewez).
@@ -8,6 +22,7 @@
 * [FIX] Lua error with unspecified optional player arguments from server console (thanks, Timmy).
 * [FIX] Overridden chat commands now respect the hidden-state (thanks, Timmy).
 * [FIX] _u now routes directly to intended functions instead of through concommands. No longer outputs error on server console when invalid parameters are passed from a client.
+* [FIX] Fixed a command injection exploit in banid.
 
 ## v2.63 - *(03/21/17)*
 * [FIX] Server errors when loading massive ban lists.

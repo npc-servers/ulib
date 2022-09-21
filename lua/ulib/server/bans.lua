@@ -17,6 +17,7 @@ ULib.BanMessage = [[
 function ULib.getBanMessage( steamid, banData, templateMessage )
 	banData = banData or ULib.bans[ steamid ]
 	if not banData then return end
+  print( templateMessage )
 	templateMessage = templateMessage or ULib.BanMessage
 
 	local replacements = {
@@ -45,8 +46,9 @@ function ULib.getBanMessage( steamid, banData, templateMessage )
 	if unban and unban > 0 then
 		replacements.TIME_LEFT = ULib.secondsToStringTime( unban - os.time() )
 	end
-
-	return templateMessage:gsub( "{{([%w_]+)}}", replacements )
+  
+  	local banMessage = templateMessage:gsub( "{{([%w_]+)}}", replacements )
+	return banMessage
 end
 
 local function checkBan( steamid64, ip, password, clpassword, name )
@@ -148,9 +150,12 @@ function ULib.addBan( steamid, time, reason, name, admin )
 
 	local admin_name
 	if admin then
-		admin_name = "(Console)"
-		if admin:IsValid() then
-			admin_name = string.format( "%s(%s)", admin:Name(), admin:SteamID() )
+		if isstring(admin) then
+			admin_name = admin
+		elseif not IsValid(admin) then
+			admin_name = "(Console)"
+		elseif admin:IsPlayer() then
+			admin_name = string.format("%s(%s)", admin:Name(), admin:SteamID())
 		end
 	end
 
