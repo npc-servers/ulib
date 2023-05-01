@@ -1,3 +1,5 @@
+-- https://github.com/Srlion/Hook-Library/blob/master/hook.lua
+
 local gmod = gmod
 local pairs = pairs
 local setmetatable = setmetatable
