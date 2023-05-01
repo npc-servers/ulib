@@ -25,8 +25,9 @@ local oldHooks = hook.GetTable()
 module( "hook" )
 
 local events = {}
-local ulibHooks = {}
 
+-- Backwards ULib compatibility
+local ulibHooks = {}
 function GetULibTable() return ulibHooks end
 
 local function find_hook( event, name )
@@ -106,10 +107,11 @@ function Add( event_name, name, func, priority )
     if not isfunction( func ) then return end
     if not name then return end
 
+
+    -- For backwards hook.GetULibTable() compatibility
     if ulibHooks[event_name] == nil then
         ulibHooks[event_name] = { [-2] = {}, [-1] = {}, [0] = {}, [1] = {}, [2] = {} }
     end
-
     ulibHooks[event_name][priority or 0][name] = { fn = func, isstring = isstring( name ) }
 
     local real_func = func
