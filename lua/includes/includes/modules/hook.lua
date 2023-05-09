@@ -20,8 +20,6 @@ local HOOK_NORMAL = HOOK_NORMAL
 --local HOOK_LOW = HOOK_LOW
 local HOOK_MONITOR_LOW = HOOK_MONITOR_LOW
 
-local oldHooks = hook.GetTable()
-
 module( "hook" )
 
 local events = {}
@@ -279,11 +277,4 @@ end
 -----------------------------------------------------------]]
 function Run( name, ... )
     return Call( name, gmod and gmod.GetGamemode() or nil, ... )
-end
-
--- Add all the old hooks
-for hookName, hookTable in pairs( oldHooks ) do
-    for name, func in pairs( hookTable ) do
-        Add( hookName, name, func )
-    end
 end
