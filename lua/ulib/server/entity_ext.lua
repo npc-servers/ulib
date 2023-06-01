@@ -76,9 +76,6 @@ for _, v in ipairs( ULib.moveWhitelist ) do
 end
 
 local getTable = meta.GetTable
-local function getKey( ent, key )
-	return getTable( ent )[key]
-end
 
 -- Extended Entity meta and hooks
 function meta:DisallowMoving( bool )
@@ -122,29 +119,29 @@ local function tool( ply, tr, toolmode, second )
 		end
 	end
 
-	if getKey( tr.Entity, "NoMoving" ) and not moveWhitelist[toolmode] then
+	if getTable( tr.Entity ).NoMoving and not moveWhitelist[toolmode] then
 		return false
 	end
 
-	if getKey( tr.Entity, "NoDeleting" ) and not delWhitelist[toolmode] then
+	if getTable( tr.Entity ).NoDeleting and not delWhitelist[toolmode] then
 		return false
 	end
 end
 hook.Add( "CanTool", "ULibEntToolCheck", tool, HOOK_HIGH )
 
 local function property( _, _, ent )
-	if getKey( ent, "NoMoving" ) and not moveWhitelist[toolmode] then
+	if getTable( ent ).NoMoving and not moveWhitelist[toolmode] then
 		return false
 	end
 
-	if getKey( ent, "NoDeleting" ) and not delWhitelist[toolmode] then
+	if getTable( ent ).NoDeleting and not delWhitelist[toolmode] then
 		return false
 	end
 end
 hook.Add( "CanProperty", "ULibEntPropertyCheck", property, HOOK_HIGH )
 
 local function physgun( _, ent )
-	if getKey( ent, "NoMoving" ) then return false end
+	if getTable( ent ).NoMoving then return false end
 end
 hook.Add( "PhysgunPickup", "ULibEntPhysCheck", physgun, HOOK_HIGH )
 hook.Add( "CanPlayerUnfreeze", "ULibEntUnfreezeCheck", physgun, HOOK_HIGH )
@@ -155,13 +152,13 @@ local function physgunReload( _, ply )
 
 	local ent = tr.Entity
 	if not ent or not ent:IsValid() or ent:IsWorld() then return end -- Invalid or not interested
-	if getKey( ent, "NoMoving" ) then return false end
+	if getTable( ent ).NoMoving then return false end
 end
 hook.Add( "OnPhysgunReload", "ULibEntPhysReloadCheck", physgunReload, HOOK_HIGH )
 
 -- This is just in case we have some horribly programmed addon that goes rampant in deleting things
 local function removedCheck( ent )
-	if getKey( ent, "NoDeleting" ) and not getKey( ent, "NoReplication" ) then
+	if getTable( ent ).NoDeleting and not getTable( ent ).NoReplication then
 		local class = ent:GetClass()
 		local pos = ent:GetPos()
 		local ang = ent:GetAngles()

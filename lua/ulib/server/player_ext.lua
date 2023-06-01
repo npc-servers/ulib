@@ -27,10 +27,6 @@ end
 local entMeta = FindMetaTable( "Entity" )
 local getTable = entMeta.GetTable
 
-local function getKey( ent, key )
-	return getTable( ent )[key]
-end
-
 -- Extended player meta and hooks
 function meta:DisallowNoclip( bool )
 	self.NoNoclip = bool
@@ -47,7 +43,7 @@ end
 local function tool( ply, _, toolmode )
 	if not ply or not ply:IsValid() then return end
 
-	if getKey( ply, "NoSpawning" ) and not spawnWhitelist[toolmode] then
+	if getTable( ply ).NoSpawning and not spawnWhitelist[toolmode] then
 		return false
 	end
 end
@@ -55,13 +51,13 @@ hook.Add( "CanTool", "ULibPlayerToolCheck", tool, HOOK_HIGH )
 
 local function noclip( ply )
 	if not ply or not ply:IsValid() then return end
-	if getKey( ply, "NoNoclip" ) then return false end
+	if getTable( ply ).NoNoclip then return false end
 end
 hook.Add( "PlayerNoClip", "ULibNoclipCheck", noclip, HOOK_HIGH )
 
 local function spawnblock( ply )
 	if not ply or not ply:IsValid() then return end
-	if getKey( ply, "NoSpawning" ) then return false end
+	if getTable( ply ).NoSpawning then return false end
 end
 hook.Add( "PlayerSpawnObject", "ULibSpawnBlock", spawnblock )
 hook.Add( "PlayerSpawnEffect", "ULibSpawnBlock", spawnblock )
@@ -74,7 +70,7 @@ hook.Add( "PlayerGiveSWEP", "ULibSpawnBlock", spawnblock )
 
 local function vehicleblock( ply )
 	if not ply or not ply:IsValid() then return end
-	if getKey( ply, "NoVehicles" ) then
+	if getTable( ply ).NoVehicles then
 		return false
 	end
 end
