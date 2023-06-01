@@ -40,7 +40,7 @@ ULib.delWhitelist = -- White list for objects that can't be deleted
 	"statue",
 	"weld_ez",
 	"axis",
-	
+
 	-- Properties
 	"gravity",
 	"collision",
@@ -60,11 +60,21 @@ ULib.moveWhitelist = -- White list for objects that can't be moved
 	"eyeposer",
 	"faceposer",
 	"remover",
-	
+
 	-- Properties
 	--"remover", -- Already above
 	"persist",
 }
+
+local delWhitelist = {}
+for _, v in ipairs( ULib.delWhitelist ) do
+	delWhitelist[v] = true
+end
+
+local moveWhitelist = {}
+for _, v in ipairs( ULib.moveWhitelist ) do
+	moveWhitelist[v] = true
+end
 
 function meta:DisallowMoving( bool )
 	self.NoMoving = bool
@@ -107,31 +117,23 @@ local function tool( ply, tr, toolmode, second )
 		end
 	end
 
-	if tr.Entity.NoMoving then
-		if not table.HasValue( ULib.moveWhitelist, toolmode ) then
-			return false
-		end
+	if tr.Entity.NoMoving and not moveWhitelist[toolmode] then
+		return false
 	end
 
-	if tr.Entity.NoDeleting then
-		if not table.HasValue( ULib.delWhitelist, toolmode ) then
-			return false
-		end
+	if tr.Entity.NoDeleting and not delWhitelist[toolmode] then
+		return false
 	end
 end
 hook.Add( "CanTool", "ULibEntToolCheck", tool, HOOK_HIGH )
 
 local function property( ply, propertymode, ent )
-	if ent.NoMoving then
-		if not table.HasValue( ULib.moveWhitelist, toolmode ) then
-			return false
-		end
+	if ent.NoMoving and not moveWhitelist[toolmode] then
+		return false
 	end
-	
-	if ent.NoDeleting then
-		if not table.HasValue( ULib.delWhitelist, toolmode ) then
-			return false
-		end
+
+	if ent.NoDeleting and not delWhitelist[toolmode] then
+		return false
 	end
 end
 hook.Add( "CanProperty", "ULibEntPropertyCheck", property, HOOK_HIGH )
@@ -151,13 +153,6 @@ local function physgunReload( weapon, ply )
 	if ent.NoMoving then return false end
 end
 hook.Add( "OnPhysgunReload", "ULibEntPhysReloadCheck", physgunReload, HOOK_HIGH )
-
-local function damageCheck( ent )
-	if ent.NoDeleting then
-		-- return false
-	end
-end
-hook.Add( "EntityTakeDamage", "ULibEntDamagedCheck", damageCheck, HOOK_MONITOR_HIGH )
 
 -- This is just in case we have some horribly programmed addon that goes rampant in deleting things
 local function removedCheck( ent )

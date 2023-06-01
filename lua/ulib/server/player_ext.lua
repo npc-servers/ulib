@@ -17,6 +17,11 @@ ULib.spawnWhitelist = -- Tool white list for tools that don't spawn things
 	"axis",
 }
 
+local spawnWhitelist = {}
+for _, v in ipairs( ULib.spawnWhitelist ) do
+	spawnWhitelist[v] = true
+end
+
 -- Return if there's nothing to add on to
 if not meta then return end
 
@@ -35,10 +40,8 @@ end
 local function tool( ply, tr, toolmode )
 	if not ply or not ply:IsValid() then return end
 
-	if ply.NoSpawning then
-		if not table.HasValue( ULib.spawnWhitelist, toolmode ) then
-			return false
-		end
+	if ply.NoSpawning and not spawnWhitelist[toolmode] then
+		return false
 	end
 end
 hook.Add( "CanTool", "ULibPlayerToolCheck", tool, HOOK_HIGH )
