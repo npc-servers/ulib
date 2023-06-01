@@ -1,4 +1,5 @@
 local meta = FindMetaTable( "Player" )
+if not meta then return end
 
 ULib.spawnWhitelist = -- Tool white list for tools that don't spawn things
 {
@@ -17,14 +18,20 @@ ULib.spawnWhitelist = -- Tool white list for tools that don't spawn things
 	"axis",
 }
 
+-- Performance optimization
 local spawnWhitelist = {}
 for _, v in ipairs( ULib.spawnWhitelist ) do
 	spawnWhitelist[v] = true
 end
 
--- Return if there's nothing to add on to
-if not meta then return end
+local entMeta = FindMetaTable( "Entity" )
+local getTable = entMeta.GetTable
 
+local function getKey( ent, key )
+	return getTable( ent )[key]
+end
+
+-- Extended player meta and hooks
 function meta:DisallowNoclip( bool )
 	self.NoNoclip = bool
 end
@@ -37,10 +44,10 @@ function meta:DisallowVehicles( bool )
 	self.NoVehicles = bool
 end
 
-local function tool( ply, tr, toolmode )
+local function tool( ply, _, toolmode )
 	if not ply or not ply:IsValid() then return end
 
-	if ply.NoSpawning and not spawnWhitelist[toolmode] then
+	if getKey( ply, "NoSpawning" ) and not spawnWhitelist[toolmode] then
 		return false
 	end
 end
@@ -48,13 +55,13 @@ hook.Add( "CanTool", "ULibPlayerToolCheck", tool, HOOK_HIGH )
 
 local function noclip( ply )
 	if not ply or not ply:IsValid() then return end
-	if ply.NoNoclip then return false end
+	if getKey( ply, "NoNoclip" ) then return false end
 end
 hook.Add( "PlayerNoClip", "ULibNoclipCheck", noclip, HOOK_HIGH )
 
 local function spawnblock( ply )
 	if not ply or not ply:IsValid() then return end
-	if ply.NoSpawning then return false end
+	if getKey( ply, "NoSpawning" ) then return false end
 end
 hook.Add( "PlayerSpawnObject", "ULibSpawnBlock", spawnblock )
 hook.Add( "PlayerSpawnEffect", "ULibSpawnBlock", spawnblock )
@@ -65,9 +72,9 @@ hook.Add( "PlayerSpawnRagdoll", "ULibSpawnBlock", spawnblock )
 hook.Add( "PlayerSpawnSENT", "ULibSpawnBlock", spawnblock )
 hook.Add( "PlayerGiveSWEP", "ULibSpawnBlock", spawnblock )
 
-local function vehicleblock( ply, ent )
+local function vehicleblock( ply )
 	if not ply or not ply:IsValid() then return end
-	if ply.NoVehicles then
+	if getKey( ply, "NoVehicles" ) then
 		return false
 	end
 end

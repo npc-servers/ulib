@@ -1,6 +1,4 @@
 local meta = FindMetaTable( "Entity" )
-
--- Return if there's nothing to add on to
 if not meta then return end
 
 
@@ -66,6 +64,7 @@ ULib.moveWhitelist = -- White list for objects that can't be moved
 	"persist",
 }
 
+-- Performance enhancement
 local delWhitelist = {}
 for _, v in ipairs( ULib.delWhitelist ) do
 	delWhitelist[v] = true
@@ -76,6 +75,12 @@ for _, v in ipairs( ULib.moveWhitelist ) do
 	moveWhitelist[v] = true
 end
 
+local getTable = meta.GetTable
+local function getKey( ent, key )
+	return getTable( ent )[key]
+end
+
+-- Extended Entity meta and hooks
 function meta:DisallowMoving( bool )
 	self.NoMoving = bool
 end
@@ -117,46 +122,46 @@ local function tool( ply, tr, toolmode, second )
 		end
 	end
 
-	if tr.Entity.NoMoving and not moveWhitelist[toolmode] then
+	if getKey( tr.Entity, "NoMoving" ) and not moveWhitelist[toolmode] then
 		return false
 	end
 
-	if tr.Entity.NoDeleting and not delWhitelist[toolmode] then
+	if getKey( tr.Entity, "NoDeleting" ) and not delWhitelist[toolmode] then
 		return false
 	end
 end
 hook.Add( "CanTool", "ULibEntToolCheck", tool, HOOK_HIGH )
 
-local function property( ply, propertymode, ent )
-	if ent.NoMoving and not moveWhitelist[toolmode] then
+local function property( _, _, ent )
+	if getKey( ent, "NoMoving" ) and not moveWhitelist[toolmode] then
 		return false
 	end
 
-	if ent.NoDeleting and not delWhitelist[toolmode] then
+	if getKey( ent, "NoDeleting" ) and not delWhitelist[toolmode] then
 		return false
 	end
 end
 hook.Add( "CanProperty", "ULibEntPropertyCheck", property, HOOK_HIGH )
 
-local function physgun( ply, ent )
-	if ent.NoMoving then return false end
+local function physgun( _, ent )
+	if getKey( ent, "NoMoving" ) then return false end
 end
 hook.Add( "PhysgunPickup", "ULibEntPhysCheck", physgun, HOOK_HIGH )
 hook.Add( "CanPlayerUnfreeze", "ULibEntUnfreezeCheck", physgun, HOOK_HIGH )
 
-local function physgunReload( weapon, ply )
+local function physgunReload( _, ply )
 	local trace = util.GetPlayerTrace( ply )
 	local tr = util.TraceLine( trace )
 
 	local ent = tr.Entity
 	if not ent or not ent:IsValid() or ent:IsWorld() then return end -- Invalid or not interested
-	if ent.NoMoving then return false end
+	if getKey( ent, "NoMoving" ) then return false end
 end
 hook.Add( "OnPhysgunReload", "ULibEntPhysReloadCheck", physgunReload, HOOK_HIGH )
 
 -- This is just in case we have some horribly programmed addon that goes rampant in deleting things
 local function removedCheck( ent )
-	if ent.NoDeleting and not ent.NoReplication then
+	if getKey( ent, "NoDeleting" ) and not getKey( ent, "NoReplication" ) then
 		local class = ent:GetClass()
 		local pos = ent:GetPos()
 		local ang = ent:GetAngles()
