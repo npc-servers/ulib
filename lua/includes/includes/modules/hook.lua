@@ -100,7 +100,7 @@ end
     Args: string hookName, any identifier, function func
     Desc: Add a hook to listen to the specified event.
 -----------------------------------------------------------]]
-function Add( event_name, name, func, priority )
+local function hookAdd( event_name, name, func, priority )
     if not isstring( event_name ) then return end
     if not isfunction( func ) then return end
     if not name then return end
@@ -195,12 +195,15 @@ function Add( event_name, name, func, priority )
     event.n = event.n + 4
 end
 
+Add = hookAdd
+Addog = hookAdd
+
 --[[---------------------------------------------------------
     Name: Remove
     Args: string hookName, identifier
     Desc: Removes the hook with the given indentifier.
 -----------------------------------------------------------]]
-function Remove( event_name, name )
+local function hookRemove( event_name, name )
     local event = events[event_name]
     if not event then return end
 
@@ -215,11 +218,14 @@ function Remove( event_name, name )
     events[event_name] = copy_event( event, event_name )
 end
 
+Remove = hookRemove
+Removeog = hookRemove
+
 --[[---------------------------------------------------------
     Name: GetTable
     Desc: Returns a table of all hooks.
 -----------------------------------------------------------]]
-function GetTable()
+local function hookGetTable()
     local new_events = {}
 
     for event_name, event in pairs( events ) do
@@ -236,12 +242,15 @@ function GetTable()
     return new_events
 end
 
+GetTable = hookGetTable
+GetTableog = hookGetTable
+
 --[[---------------------------------------------------------
     Name: Call
     Args: string hookName, table gamemodeTable, vararg args
     Desc: Calls hooks associated with the hook name.
 -----------------------------------------------------------]]
-function Call( event_name, gm, ... )
+local function hookCall( event_name, gm, ... )
     local event = events[event_name]
     if event then
         local i, n = 2, event.n
@@ -270,11 +279,17 @@ function Call( event_name, gm, ... )
     return GamemodeFunction( gm, ... )
 end
 
+Call = hookCall
+Callog = hookCall
+
 --[[---------------------------------------------------------
     Name: Run
     Args: string hookName, vararg args
     Desc: Calls hooks associated with the hook name.
 -----------------------------------------------------------]]
-function Run( name, ... )
+local function hookRun( name, ... )
     return Call( name, gmod and gmod.GetGamemode() or nil, ... )
 end
+
+Run = hookRun
+Runog = hookRun
