@@ -1,7 +1,6 @@
 local meta = FindMetaTable( "Entity" )
 if not meta then return end
 
-
 -- Are you a STOOL author who's angry that your tool isn't on this list?
 -- Just add this to your code:
 -- if ULib then table.insert( ULib.delWhiteList, "my_stool" ) end
@@ -119,22 +118,24 @@ local function tool( ply, tr, toolmode, second )
 		end
 	end
 
-	if getTable( tr.Entity ).NoMoving and not moveWhitelist[toolmode] then
+    local trTable = getTable( tr.Entity )
+	if trTable.NoMoving and not moveWhitelist[toolmode] then
 		return false
 	end
 
-	if getTable( tr.Entity ).NoDeleting and not delWhitelist[toolmode] then
+	if trTable.NoDeleting and not delWhitelist[toolmode] then
 		return false
 	end
 end
 hook.Add( "CanTool", "ULibEntToolCheck", tool, HOOK_HIGH )
 
 local function property( _, _, ent )
-	if getTable( ent ).NoMoving and not moveWhitelist[toolmode] then
+    local entTable = getTable( ent )
+	if entTable.NoMoving and not moveWhitelist[toolmode] then
 		return false
 	end
 
-	if getTable( ent ).NoDeleting and not delWhitelist[toolmode] then
+	if entTable.NoDeleting and not delWhitelist[toolmode] then
 		return false
 	end
 end
@@ -158,7 +159,8 @@ hook.Add( "OnPhysgunReload", "ULibEntPhysReloadCheck", physgunReload, HOOK_HIGH 
 
 -- This is just in case we have some horribly programmed addon that goes rampant in deleting things
 local function removedCheck( ent )
-	if getTable( ent ).NoDeleting and not getTable( ent ).NoReplication then
+    local entTable = getTable( ent )
+	if entTable.NoDeleting and not entTable.NoReplication then
 		local class = ent:GetClass()
 		local pos = ent:GetPos()
 		local ang = ent:GetAngles()
