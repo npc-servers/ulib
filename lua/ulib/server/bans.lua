@@ -245,9 +245,9 @@ function ULib.unban( steamid, admin )
 	RunConsoleCommand( "writeid" ) -- Saving
 
 	--ULib banlist
-	ULib.bans[steamid] = nil
-	sql.Query( "DELETE FROM ulib_bans WHERE steamid=" .. util.SteamIDTo64( steamid ) )
-	hook.Call( ULib.HOOK_USER_UNBANNED, _, steamid, admin )
+	ULib.bans[safe] = nil
+	sql.Query( "DELETE FROM ulib_bans WHERE steamid=" .. util.SteamIDTo64( safe ) )
+	hook.Call( ULib.HOOK_USER_UNBANNED, _, safe, admin )
 end
 
 
