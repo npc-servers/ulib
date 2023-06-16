@@ -236,6 +236,11 @@ function ULib.unban( steamid, admin )
 
 	local safe = util.SteamIDFrom64( util.SteamIDTo64( steamid ) )
 
+	if safe == "STEAM_0:0:0" then
+		ULib.tsayError( admin, "Invalid steamid." )
+		return
+	end
+
 	game.ConsoleCommand( "removeid " .. safe .. "\n" )
 	RunConsoleCommand( "writeid" ) -- Saving
 
