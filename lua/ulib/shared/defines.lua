@@ -8,7 +8,7 @@ ULib = ULib or {}
 
 ULib.RELEASE = false -- Don't access these two directly, use ULib.pluginVersionStr("ULib")
 ULib.VERSION = 2.71
-ULib.AUTOMATIC_UPDATE_CHECKS = true
+ULib.AUTOMATIC_UPDATE_CHECKS = false
 
 ULib.ACCESS_ALL = "user"
 ULib.ACCESS_OPERATOR = "operator"
