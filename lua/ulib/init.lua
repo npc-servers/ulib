@@ -11,6 +11,8 @@ if not ULib then
 	Msg( "///////////////////////////////\n" )
 	Msg( "// Loading...                //\n" )
 
+	Msg( "//  shared/pon.lua           //\n" )
+	include( "ulib/shared/pon.lua" )
 	Msg( "//  shared/defines.lua       //\n" )
 	include( "ulib/shared/defines.lua" )
 	Msg( "//  shared/misc.lua          //\n" )

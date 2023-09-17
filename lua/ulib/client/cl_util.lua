@@ -6,7 +6,12 @@
 
 local function ULibRPC()
 	local fn_string = net.ReadString()
-	local args = net.ReadTable()
+	local byteCount = net.ReadUInt( 16 )
+	local compressed = net.ReadData( byteCount )
+	local uncompressed = util.Decompress( compressed )
+	if not uncompressed then return error( "Received bad RPC, could not decompress!" ) end
+
+	local args = ULib.pon.decode( uncompressed )
 	local success, fn = ULib.findVar( fn_string )
 	if not success or type( fn ) ~= "function" then return error( "Received bad RPC, invalid function (" .. tostring( fn_string ) .. ")!" ) end
 
