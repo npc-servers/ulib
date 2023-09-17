@@ -502,7 +502,7 @@ end
 
 		v2.40 - Removed dependency on gmod functions.
 		v2.60 - Now returns two values to indicate success and value.
-		        Added second parameter for root table and added better handling for nil values.
+				Added second parameter for root table and added better handling for nil values.
 ]]
 function ULib.findVar( varLocation, rootTable )
 	ULib.checkArg( 1, "ULib.findVar", "string", varLocation )
@@ -629,14 +629,19 @@ end
 ]]
 function ULib.checkArg( argnum, fnName, expected, data, throwLevel )
 	throwLevel = throwLevel or 4
-	if type( expected ) == "string" then
+	if isstring( expected ) then
 		if type( data ) == expected then
 			return
 		else
 			return ULib.throwBadArg( argnum, fnName, expected, data, throwLevel )
 		end
 	else
-		if table.HasValue( expected, type( data ) ) then
+		local expectedKv = {}
+		for _, v in ipairs( expected ) do
+			expectedKv[v] = true
+		end
+
+		if expectedKv[type( data )] then
 			return
 		else
 			return ULib.throwBadArg( argnum, fnName, table.concat( expected, "," ), data, throwLevel )
