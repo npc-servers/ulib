@@ -200,13 +200,15 @@ repCvarServerChanged = function( sv_cvar, oldvalue, newvalue )
 	if not repcvars[ sv_cvar ] then -- Bad value or we need to ignore it
 		return
 	end
-	
-	net.Start( "ulib_repChangeCvar" ) -- Tell clients to reset to new value
-		net.WriteEntity( repcvars[ sv_cvar ].ignore or Entity( 0 ) )
-		net.WriteString( repcvars[ sv_cvar ].cl_cvar )
-		net.WriteString( oldvalue )
-		net.WriteString( newvalue )
-	net.Broadcast()
+
+	if player.GetCount() ~= 0 then
+		net.Start( "ulib_repChangeCvar" ) -- Tell clients to reset to new value
+			net.WriteEntity( repcvars[ sv_cvar ].ignore or Entity( 0 ) )
+			net.WriteString( repcvars[ sv_cvar ].cl_cvar )
+			net.WriteString( oldvalue )
+			net.WriteString( newvalue )
+		net.Broadcast()
+	end
 
 	if repcvars[ sv_cvar ].ignore then
 		repcvars[ sv_cvar ].ignore = nil
