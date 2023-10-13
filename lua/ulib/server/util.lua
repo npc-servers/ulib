@@ -26,8 +26,8 @@ function ULib.clientRPC( plys, fn, ... )
 	ULib.checkArg( 1, "ULib.clientRPC", {"nil","Player","table"}, plys )
 	ULib.checkArg( 2, "ULib.clientRPC", {"string"}, fn )
 
-	local json = ULib.pon.encode( { ... } )
-	local compressed = util.Compress( json )
+	local poncoded = ULib.pon.encode( { ... } )
+	local compressed = util.Compress( poncoded )
 
 	net.Start( "URPC" )
 	net.WriteString( fn )
