@@ -129,14 +129,15 @@ function ULib.replicatedWritableCvar( sv_cvar, cl_cvar, default_value, save, not
 	end
 
 	local cvar_obj = GetConVar( sv_cvar ) or CreateConVar( sv_cvar, default_value, flags )
-	
-	
-	net.Start("ulib_repWriteCvar")
-		net.WriteString( sv_cvar )
-		net.WriteString( cl_cvar )
-		net.WriteString( default_value )
-		net.WriteString( cvar_obj:GetString() )
-	net.Broadcast()
+
+	if player.GetCount() ~= 0 then
+		net.Start( "ulib_repWriteCvar" )
+			net.WriteString( sv_cvar )
+			net.WriteString( cl_cvar )
+			net.WriteString( default_value )
+			net.WriteString( cvar_obj:GetString() )
+		net.Broadcast()
+	end
 
 	repcvars[ sv_cvar ] = { access=access, default=default_value, cl_cvar=cl_cvar, cvar_obj=cvar_obj }
 	cvars.AddChangeCallback( sv_cvar, repCvarServerChanged )
@@ -148,14 +149,12 @@ end
 
 local function repCvarOnJoin( ply )
 	for sv_cvar, v in pairs( repcvars ) do
-	
-		net.Start("ulib_repWriteCvar")
+		net.Start( "ulib_repWriteCvar" )
 			net.WriteString( sv_cvar )
 			net.WriteString( v.cl_cvar )
 			net.WriteString( v.default )
 			net.WriteString( v.cvar_obj:GetString() )
 		net.Send( ply )
-		
 	end
 end
 hook.Add( ULib.HOOK_LOCALPLAYERREADY, "ULibSendCvars", repCvarOnJoin )
