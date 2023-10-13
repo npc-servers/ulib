@@ -60,29 +60,39 @@ local function clCvarChanged( cl_cvar, oldvalue, newvalue )
 end
 
 -- This is the counterpart to <replicatedWithWritableCvar>. See that function for more info. We also add callbacks from here.
+local function replicateConvar( sv_cvar, cl_cvar, default_value, current_value )
+	cvarinfo[sv_cvar] = GetConVar( cl_cvar ) or CreateClientConVar( cl_cvar, default_value, false, false ) -- Make sure it's created one way or another (second case is most common)
+	reversecvar[cl_cvar] = { sv_cvar = sv_cvar }
 
-net.Receive( "ulib_repWriteCvar", function( len )
+	ULib.queueFunctionCall( function() -- Queued to ensure we don't overload the client console
+		hook.Call( ULib.HOOK_REPCVARCHANGED, _, sv_cvar, cl_cvar, nil, nil, current_value )
+		if cvarinfo[sv_cvar]:GetString() ~= current_value then
+			reversecvar[cl_cvar].ignore = true -- Flag so hook doesn't do anything. Flag is removed at hook.
+			RunConsoleCommand( cl_cvar, current_value )
+		end
+	end )
+	cvars.AddChangeCallback( cl_cvar, clCvarChanged )
+end
 
+net.Receive( "ulib_repWriteCvar", function()
 	local sv_cvar = net.ReadString()
 	local cl_cvar = net.ReadString()
 	local default_value = net.ReadString()
 	local current_value = net.ReadString()
 
-	cvarinfo[ sv_cvar ] = GetConVar( cl_cvar ) or CreateClientConVar( cl_cvar, default_value, false, false ) -- Make sure it's created one way or another (second case is most common)
-	reversecvar[ cl_cvar ] = { sv_cvar=sv_cvar }
-
-	ULib.queueFunctionCall( function() -- Queued to ensure we don't overload the client console
-		hook.Call( ULib.HOOK_REPCVARCHANGED, _, sv_cvar, cl_cvar, nil, nil, current_value )
-		if cvarinfo[ sv_cvar ]:GetString() ~= current_value then
-			reversecvar[ cl_cvar ].ignore = true -- Flag so hook doesn't do anything. Flag is removed at hook.
-			RunConsoleCommand( cl_cvar, current_value )
-		end
-	end )
-	
-	cvars.AddChangeCallback( cl_cvar, clCvarChanged )
-	
+	replicateConvar( sv_cvar, cl_cvar, default_value, current_value )
 end )
 
+net.Receive( "ulib_repWriteCvars", function()
+	local size = net.ReadUInt( 16 )
+	local compressed = net.ReadData( size )
+	local uncompressed = util.Decompress( compressed )
+	local cvarTable = ULib.pon.decode( uncompressed )
+
+	for sv_cvar, info in pairs( cvarTable ) do
+		replicateConvar( sv_cvar, info[1], info[2], info[3] )
+	end
+end )
 
 -- This is called when they've attempted to change a cvar they don't have access to.
 

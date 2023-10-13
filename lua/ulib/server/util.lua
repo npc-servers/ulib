@@ -148,17 +148,20 @@ function ULib.replicatedWritableCvar( sv_cvar, cl_cvar, default_value, save, not
 end
 
 local function repCvarOnJoin( ply )
+	local sendTbl = {}
 	for sv_cvar, v in pairs( repcvars ) do
-		net.Start( "ulib_repWriteCvar" )
-			net.WriteString( sv_cvar )
-			net.WriteString( v.cl_cvar )
-			net.WriteString( v.default )
-			net.WriteString( v.cvar_obj:GetString() )
-		net.Send( ply )
+		sendTbl[sv_cvar] = { v.cl_cvar, v.default, v.cvar_obj:GetString() }
 	end
+
+	local poncoded = ULib.pon.encode( sendTbl )
+	local compressed = util.Compress( poncoded )
+
+	net.Start( "ulib_repWriteCvars" )
+		net.WriteUInt( #compressed, 16 )
+		net.WriteData( compressed, #compressed )
+	net.Send( ply )
 end
 hook.Add( ULib.HOOK_LOCALPLAYERREADY, "ULibSendCvars", repCvarOnJoin )
-
 
 local function clientChangeCvar( ply, command, argv )
 	local sv_cvar = argv[ 1 ]
