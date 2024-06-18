@@ -1122,9 +1122,10 @@ local playerAuth = hook.GetTable().PlayerInitialSpawn.PlayerAuthSpawn
 hook.Remove( "PlayerInitialSpawn", "PlayerAuthSpawn" ) -- Remove from original spot
 
 local function newPlayerAuth( ply, ... )
-	ucl.authed[ ply:UniqueID() ] = nil -- If the player ent is removed before disconnecting, we can have this hanging out there.
+	ucl.authed[ply:UniqueID()] = nil -- If the player ent is removed before disconnecting, we can have this hanging out there.
 	playerAuth( ply, ... ) -- Put here, slightly ahead of ucl.
 	ucl.probe( ply, ... )
+	ULib.clientRPC( ply, "ULib.ucl.initClientGroups", ucl.groups )
 end
 hook.Add( "PlayerAuthed", "ULibAuth", newPlayerAuth, HOOK_MONITOR_HIGH )
 
