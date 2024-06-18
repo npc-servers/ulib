@@ -51,6 +51,8 @@ ULib.HOOK_UCLAUTH = "UCLAuthed"
 		v2.40 - Initial
 ]]
 ULib.HOOK_UCLCHANGED = "UCLChanged"
+ULib.HOOK_UCL_GROUP_CHANGED = "UCLGroupChanged" -- Called when a group is changed
+ULib.HOOK_UCL_AUTHED_CHANGED = "UCLAuthChanged" -- Called when a player's auth changes
 
 --[[
 	Hook: UCLAccessRegistered
