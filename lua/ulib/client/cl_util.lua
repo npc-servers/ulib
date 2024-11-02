@@ -34,7 +34,6 @@ net.Receive( "URPC", ULibRPC )
 net.Receive( "ulib_sound", function( ln )
 	local str = net.ReadString()
 	if not ULib.fileExists( "sound/" .. str ) then
-		Msg( "[LC ULib ERROR] Received invalid sound\n" )
 		return
 	end
 

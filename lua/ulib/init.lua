@@ -10,46 +10,25 @@ if not ULib then
 	Msg( "//      Ulysses Library      //\n" )
 	Msg( "///////////////////////////////\n" )
 	Msg( "// Loading...                //\n" )
-
-	Msg( "//  shared/pon.lua           //\n" )
 	include( "ulib/shared/pon.lua" )
-	Msg( "//  shared/defines.lua       //\n" )
 	include( "ulib/shared/defines.lua" )
-	Msg( "//  shared/misc.lua          //\n" )
 	include( "ulib/shared/misc.lua" )
-	Msg( "//  shared/util.lua          //\n" )
 	include( "ulib/shared/util.lua" )
-	Msg( "//  shared/table.lua         //\n" )
 	include( "ulib/shared/tables.lua" )
-	Msg( "//  shared/player.lua        //\n" )
 	include( "ulib/shared/player.lua" )
-	Msg( "//  server/player.lua        //\n" )
 	include( "ulib/server/player.lua" )
-	Msg( "//  server/bans.lua          //\n" )
 	include( "ulib/server/bans.lua" )
-	Msg( "//  shared/messages.lua      //\n" )
 	include( "ulib/shared/messages.lua" )
-	Msg( "//  shared/commands.lua      //\n" )
 	include( "ulib/shared/commands.lua" )
-	Msg( "//  server/concommand.lua    //\n" )
 	include( "ulib/server/concommand.lua" )
-	Msg( "//  server/util.lua          //\n" )
 	include( "ulib/server/util.lua" )
-	Msg( "//  shared/sh_ucl.lua        //\n" )
 	include( "ulib/shared/sh_ucl.lua" )
-	Msg( "//  server/ucl.lua           //\n" )
 	include( "ulib/server/ucl.lua" )
-	Msg( "//  server/phys.lua          //\n" )
 	include( "ulib/server/phys.lua" )
-	Msg( "//  server/player_ext.lua    //\n" )
 	include( "server/player_ext.lua" )
-	Msg( "//  server/entity_ext.lua    //\n" )
 	include( "server/entity_ext.lua" )
-	Msg( "//  shared/plugin.lua        //\n" )
 	include( "ulib/shared/plugin.lua" )
-	Msg( "//  shared/cami_global.lua   //\n" )
 	include( "shared/cami_global.lua" )
-	Msg( "//  shared/cami_ulib.lua     //\n" )
 	include( "shared/cami_ulib.lua" )
 	Msg( "// Load Complete!            //\n" )
 	Msg( "///////////////////////////////\n" )
@@ -72,7 +51,6 @@ if not ULib then
 	local files = file.Find( "ulib/modules/*.lua", "LUA" )
 	if #files > 0 then
 		for _, file in ipairs( files ) do
-			Msg( "[ULIB] Loading SHARED module: " .. file .. "\n" )
 			include( "ulib/modules/" .. file )
 			AddCSLuaFile( "ulib/modules/" .. file )
 		end
@@ -82,7 +60,6 @@ if not ULib then
 	local files = file.Find( "ulib/modules/server/*.lua", "LUA" )
 	if #files > 0 then
 		for _, file in ipairs( files ) do
-			Msg( "[ULIB] Loading SERVER module: " .. file .. "\n" )
 			include( "ulib/modules/server/" .. file )
 		end
 	end
@@ -91,7 +68,6 @@ if not ULib then
 	local files = file.Find( "ulib/modules/client/*.lua", "LUA" )
 	if #files > 0 then
 		for _, file in ipairs( files ) do
-			Msg( "[ULIB] Loading CLIENT module: " .. file .. "\n" )
 			AddCSLuaFile( "ulib/modules/client/" .. file )
 		end
 	end
