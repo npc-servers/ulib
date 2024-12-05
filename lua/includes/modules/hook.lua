@@ -287,8 +287,13 @@ Callog = hookCall
     Args: string hookName, vararg args
     Desc: Calls hooks associated with the hook name.
 -----------------------------------------------------------]]
+local currentGM
 local function hookRun( name, ... )
-    return Call( name, gmod and gmod.GetGamemode() or nil, ... )
+    if not currentGM then
+        currentGM = gmod and gmod.GetGamemode() or nil
+    end
+
+    return Call( name, currentGM, ... )
 end
 
 Run = hookRun
