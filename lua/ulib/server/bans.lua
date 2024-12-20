@@ -15,7 +15,7 @@ ULib.BanMessage = [[
 {{TIME_LEFT}} ]]
 
 function ULib.getBanMessage( steamid, banData, templateMessage )
-	banData = banData or ULib.bans[ steamid ]
+	banData = banData or ULib.bans[steamid]
 	if not banData then return end
 	templateMessage = templateMessage or ULib.BanMessage
 
@@ -45,7 +45,7 @@ function ULib.getBanMessage( steamid, banData, templateMessage )
 	if unban and unban > 0 then
 		replacements.TIME_LEFT = ULib.secondsToStringTime( unban - os.time() )
 	end
-  
+
   	local banMessage = templateMessage:gsub( "{{([%w_]+)}}", replacements )
 	return banMessage
 end
@@ -62,9 +62,7 @@ local function checkBan( steamid64, ip, password, clpassword, name )
 	Msg(string.format("%s (%s)<%s> was kicked by ULib because they are on the ban list\n", name, steamid, ip))
 	return false, message
 end
-hook.Add( "CheckPassword", "ULibBanCheck", checkBan, HOOK_LOW )
--- Low priority to allow servers to easily have another ban message addon
-
+hook.Add( "CheckPassword", "ULibBanCheck", checkBan, HOOK_LOW ) -- Low priority to allow servers to easily have another ban message addon
 
 --[[
 	Function: ban
@@ -147,6 +145,12 @@ end
 function ULib.addBan( steamid, time, reason, name, admin )
 	if reason == "" then reason = nil end
 
+	local safe = util.SteamIDFrom64( util.SteamIDTo64( steamid ) )
+	if safe == "STEAM_0:0:0" then
+		ULib.tsayError( admin, "Invalid steamid." )
+		return
+	end
+
 	local admin_name
 	if admin then
 		if isstring(admin) then
@@ -161,8 +165,9 @@ function ULib.addBan( steamid, time, reason, name, admin )
 	-- Clean up passed data
 	local t = {}
 	local timeNow = os.time()
-	if ULib.bans[ steamid ] then
-		t = ULib.bans[ steamid ]
+	local banTbl = ULib.bans[steamid]
+	if banTbl then
+		t = banTbl
 		t.modified_admin = admin_name
 		t.modified_time = timeNow
 	else
@@ -178,10 +183,10 @@ function ULib.addBan( steamid, time, reason, name, admin )
 	t.name = name
 	t.steamID = steamid
 
-	ULib.bans[ steamid ] = t
+	ULib.bans[steamid] = t
 
-	local strTime = time ~= 0 and ULib.secondsToStringTime( time*60 )
-	local shortReason = "Banned for " .. (strTime or "eternity")
+	local strTime = time ~= 0 and ULib.secondsToStringTime( time * 60 )
+	local shortReason = "Banned for " .. ( strTime or "eternity" )
 	if reason then
 		shortReason = shortReason .. ": " .. reason
 	end
@@ -221,7 +226,12 @@ end
 function ULib.unban( steamid, admin )
 	local safe = util.SteamIDFrom64( util.SteamIDTo64( steamid ) )
 	if safe == "STEAM_0:0:0" then
-		ULib.tsayError( admin, "Invalid steamid." )
+		ULib.tsayError( admin, "Invalid steamid in ULib.unban." )
+		debug.Trace()
+
+		ULib.bans[safe] = nil
+		sql.Query( "DELETE FROM ulib_bans WHERE steamid=" .. util.SteamIDTo64( safe ) )
+
 		return
 	end
 
@@ -277,40 +287,16 @@ function ULib.getLegacyBans()
 	end
 end
 
-local legacy_bans = ULib.getLegacyBans()
-
-
---[[
-	Function: refreshBans
-
-	Refreshes the ULib bans.
-]]
-function ULib.refreshBans()
-	local results = sql.Query( "SELECT * FROM ulib_bans" )
-
-	ULib.bans = {}
-	if results then
-		for i=1, #results do
-			local r = results[i]
-
-			r.steamID = util.SteamIDFrom64( r.steamid )
-			r.steamid = nil
-			r.reason = nilIfNull( r.reason )
-			r.name = nilIfNull( r.name )
-			r.admin = nilIfNull( r.admin )
-			r.modified_admin = nilIfNull( r.modified_admin )
-			r.modified_time = nilIfNull( r.modified_time )
-			ULib.bans[ r.steamID ] = r
-		end
-	end
-
+do
+	local legacy_bans = ULib.getLegacyBans()
 	if legacy_bans then
+		if not legacy_bans then return end
 		sql.Begin()
 		for steamID, bandata in pairs( legacy_bans ) do
 			bandata.steamID = steamID -- Ensure this is set in the data
-			if not ULib.bans[ steamID ] then
+			if not ULib.bans[steamID] then
 				writeBan( bandata )
-				ULib.bans[ steamID ] = bandata
+				ULib.bans[steamID] = bandata
 			end
 		end
 		sql.Commit()
@@ -320,4 +306,37 @@ function ULib.refreshBans()
 		legacy_bans = nil
 	end
 end
-hook.Add( "Initialize", "ULibLoadBans", ULib.refreshBans, HOOK_MONITOR_HIGH )
+
+-- Load bans
+ULib.bans = {}
+do
+	local results = sql.Query( "SELECT * FROM ulib_bans" )
+	if results then
+		for _, r in ipairs( results ) do
+			r.steamID = util.SteamIDFrom64( r.steamid )
+			r.steamid = nil
+			r.reason = nilIfNull( r.reason )
+			r.name = nilIfNull( r.name )
+			r.admin = nilIfNull( r.admin )
+			r.modified_admin = nilIfNull( r.modified_admin )
+			r.modified_time = nilIfNull( r.modified_time )
+			ULib.bans[r.steamID] = r
+		end
+	end
+end
+
+-- Backwards compatibility for ULib.bans
+local function checkUnbans()
+	local results = sql.Query( "SELECT * FROM ulib_bans WHERE unban != 0 AND unban <= " .. os.time() )
+	if results then
+		for _, result in ipairs( results ) do
+			ULib.unban( util.SteamIDFrom64( result.steamid ) )
+		end
+	end
+end
+
+checkUnbans()
+
+timer.Create( "ulx_unbantimer", 60, 0, function()
+	ProtectedCall( checkUnbans )
+end )
