@@ -1218,37 +1218,13 @@ hook.Add( ULib.HOOK_UCL_GROUP_CHANGED, "ULibSendUCLToClients", groupChanged )
 local playerAuth = hook.GetTable().PlayerInitialSpawn.PlayerAuthSpawn
 hook.Remove( "PlayerInitialSpawn", "PlayerAuthSpawn" ) -- Remove from original spot
 
-local function newPlayerAuth( ply )
+local function newPlayerAuth( ply, ... )
 	ucl.authed[ply:UniqueID()] = nil -- If the player ent is removed before disconnecting, we can have this hanging out there.
-	playerAuth( ply ) -- Put here, slightly ahead of ucl.
-	ucl.probe( ply )
+	playerAuth( ply, ... ) -- Put here, slightly ahead of ucl.
+	ucl.probe( ply, ... )
 	ULib.clientRPC( ply, "ULib.ucl.initClientGroups", ucl.groups )
 end
-
-do
-	local awaitingPlayers = {}
-	hook.Add( "PlayerInitialSpawn", "ULibAuth", function( ply )
-		if not ply:IsFullyAuthenticated() then
-			awaitingPlayers[ply:SteamID()] = ply
-			return
-		end
-
-		newPlayerAuth( ply )
-	end )
-
-	hook.Add( "NetworkIDValidated", "ULibAuth", function( _, steamid )
-		local ply = awaitingPlayers[steamid]
-		awaitingPlayers[steamid] = nil
-		if not IsValid( ply ) then return end
-
-		newPlayerAuth( ply )
-	end )
-
-	hook.Add( "PlayerDisconnected", "ULibAuth", function( ply )
-		awaitingPlayers[ply:SteamID()] = nil
-	end )
-end
-
+hook.Add( "PlayerAuthed", "ULibAuth", newPlayerAuth, HOOK_MONITOR_HIGH )
 
 local meta = FindMetaTable( "Player" )
 if not meta then return end
